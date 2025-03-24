@@ -10,11 +10,15 @@ import {
   Image
 } from "react-native";
 import api from "../axios/axios";
+import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 
-export default function Login({ navigation }) {
+export default function Login() {
+  const navigation = useNavigation();
   const [user, setUser] = useState({
     email: "",
     password: "",
+    showPassword: false,
   });
 
   async function handleLogin() {
@@ -28,7 +32,7 @@ export default function Login({ navigation }) {
     );
   }
   return (
-    <View style={styles.container}>
+    <View style={styles.container}> 
         <Image source={require('../../assets/SENAI.png')} style={styles.imagem}/>
       <Text style={styles.title}> Faça Login</Text>
       <TextInput
@@ -40,15 +44,22 @@ export default function Login({ navigation }) {
           setUser({ ...user, email: value });
         }}
       />
-      <TextInput
-      style={styles.input}
+     <View style={styles.passwordContainer}>
+      <TextInput 
+      style={styles.passwordInput}
         placeholder="Senha"
         placeholderTextColor="black"
         value={user.password}
+        secureTextEntry={user.showPassword}
         onChangeText={(value) => {
           setUser({ ...user, password: value });
         }}
       />
+      <TouchableOpacity
+      onPress={() => setUser({ ...user, showPassword: !user.showPassword })}
+      >
+      <Ionicons name={user.showPassword?"eye":"eye-off"} size={24} color="gray" />
+      </TouchableOpacity>
       <TouchableOpacity onPress={handleLogin} style={styles.button}>
         <Text>Entrar</Text>
       </TouchableOpacity>
@@ -57,6 +68,7 @@ export default function Login({ navigation }) {
     <TouchableOpacity onPress={() => navigation.navigate("Cadastro")}>
     <Text style={styles.textnav}> Clique aqui</Text>
     </TouchableOpacity>
+    </View>
     </View>
     </View>
   );
