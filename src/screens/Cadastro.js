@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   Alert,
   StyleSheet,
-  Button,
   Image,
 } from "react-native";
 import api from "../axios/axios";
@@ -92,13 +91,13 @@ export default function Cadastro() {
         {/* Botão do Ícone */}
         <TouchableOpacity
           onPress={() => setUser({ ...user, showPassword: !user.showPassword })}
-        />
-        {/* Ícone */}
-        <Ionicons
-          name={user.showPassword ? "eye" : "eye-off"}
-          size={24}
-          color="gray"
-        />
+        >
+          <Ionicons
+            name={user.showPassword ? "eye" : "eye-off"}
+            size={24}
+            color="gray"
+          />
+        </TouchableOpacity>
         {/* Fecha View Input senha */}
       </View>
 

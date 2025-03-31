@@ -2,14 +2,10 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
-  Alert,
   StyleSheet,
-  Button,
   Image,
 } from "react-native";
-import api from "../axios/axios";
 import { Ionicons } from "@expo/vector-icons";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 
