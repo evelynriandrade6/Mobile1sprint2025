@@ -40,6 +40,8 @@ export default function Home({ navigation }) {
       </View>
     </View>
   );
+
+  {/* Estilização do Home */}
 }
 
 const styles = StyleSheet.create({

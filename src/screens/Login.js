@@ -38,6 +38,7 @@ export default function Login() {
     <View style={styles.container}>
       <Image source={require("../../assets/SENAI.png")} style={styles.imagem} />
       <Text style={styles.title}> Faça Login</Text>
+      {/* Input CPF */}
       <TextInput
         style={styles.input}
         placeholder="CPF"
@@ -47,7 +48,9 @@ export default function Login() {
           setUser({ ...user, cpf: value });
         }}
       />
+      {/* View Input senha */}
       <View style={styles.passwordContainer}>
+        {/* Input senha */}
         <TextInput
           placeholder="Senha"
           placeholderTextColor="black"
@@ -60,13 +63,17 @@ export default function Login() {
         <TouchableOpacity
           onPress={() => setUser({ ...user, showPassword: !user.showPassword })}
         >
+          {/* Botão do Ícone */}
           <Ionicons
             name={user.showPassword ? "eye" : "eye-off"}
             size={24}
             color="gray"
           />
         </TouchableOpacity>
+        {/* Fecha View Input senha */}
       </View>
+
+      {/* Botão Final */}
       <TouchableOpacity onPress={handleLogin} style={styles.button}>
         <Text>Entrar</Text>
       </TouchableOpacity>
@@ -78,6 +85,8 @@ export default function Login() {
       </View>
     </View>
   );
+
+  {/* Estilização do login */}
 }
 
 const styles = StyleSheet.create({

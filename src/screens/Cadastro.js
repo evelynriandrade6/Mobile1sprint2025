@@ -115,8 +115,10 @@ export default function Cadastro() {
       {/* Fecha View Principal */}
     </View>
   );
-}
 
+  {/* Estilização do cadastro */}
+}
+ 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -148,7 +150,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
     width: "80%",
-    alignItems: "center"
+    alignItems: "center",
   },
   passwordContainer: {
     flexDirection: "row",
@@ -176,8 +178,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   subtitulo: {
-    alignSelf:"flex-start",
+    alignSelf: "flex-start",
     marginBottom: 4,
-    fontSize: 18
-  }
+    fontSize: 18,
+  },
 });
