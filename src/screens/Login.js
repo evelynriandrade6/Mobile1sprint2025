@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   Alert,
   StyleSheet,
-  Button,
   Image,
 } from "react-native";
 import api from "../axios/axios";
