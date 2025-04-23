@@ -54,7 +54,7 @@ export default function Login() {
           placeholder="Senha"
           placeholderTextColor="black"
           value={user.password}
-          secureTextEntry={user.showPassword}
+          secureTextEntry={!user.showPassword}
           onChangeText={(value) => {
             setUser({ ...user, password: value });
           }}
@@ -73,7 +73,7 @@ export default function Login() {
       </View>
 
       {/* Botão Final */}
-      <TouchableOpacity onPress={handleLogin} style={styles.button}>
+      <TouchableOpacity onPress={()=>navigation.navigate("ClassroomScreen")} style={styles.button}>
         <Text>Entrar</Text>
       </TouchableOpacity>
       <View style={styles.navigate}>
