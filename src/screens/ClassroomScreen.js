@@ -10,39 +10,37 @@ import {
   ActivityIndicator,
 } from "react-native";
 
-
 export default function ClassroomScreen({ navigation }) {
   const [classroom, setClassroom] = useState([]);
-  const [ingressos, setIngressos] = useState([]);
+  const [schedule, setSchedule] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [ClassroomSelecionado, setClassroomSelecionado] = useState('');
+  const [ClassroomSelecionado, setClassroomSelecionado] = useState("");
+  
 
   useEffect(() => {
-    getClassrooom();
-  },[]);
+    getAllClassrooms();
+  }, []);
 
-  async function getClassroom() {
+  async function getAllClassrooms() {
     try {
-      const response = await api.getClassroom();
+      const response = await api.getAllClassrooms();
       console.log(response.data);
-      setClassroom(response.data.events);
+      setClassroom(response.data.classrooms);
       setLoading(false);
     } catch (error) {
       console.log(error.response.data.error);
     }
   }
 
-  async function abrirModalComTeladeReserva(classroom){
-    setClassroomSelecionado(classroom)
+  async function abrirModalComTeladeReserva(classroom) {
+    setClassroomSelecionado(classroom);
     setModalVisible(true);
-    try{
-      const response = await api.getIngressosPorEvento(evento.id_evento);
-      setIngressos(response.data.schedule);
-      
-    }catch (error) {
+    try {
+      const response = await api.createSchedule(classroom.number);
+      setSchedule(response.data.schedule);
+    } catch (error) {
       console.log("Erro ao entrar na sala", error.response);
-
     }
   }
 
@@ -58,7 +56,7 @@ export default function ClassroomScreen({ navigation }) {
           keyExtractor={(item) => item.number.toString()}
           renderItem={({ item }) => (
             <TouchableOpacity
-              style={styles.eventCard}
+              style={styles.classroomCard}
               onPress={() => abrirModalComTeladeReserva(item)}
             >
               <Text>{item.number}</Text>
@@ -74,24 +72,14 @@ export default function ClassroomScreen({ navigation }) {
         animationType="slide"
       >
         <View style={styles.modalContainer}>
-          <Text>Ingressos para:{ClassroomSelecionado.nome}</Text>
-          {ingressos.length === 0 ? (
-            <Text>Nenhum ingresso encontrado</Text>
-          ) : (
-            <FlatList
-              data={ingressos}
-              keyExtractor={(item) => item.id_ingresso.toString()}
-              renderItem={({ item }) =>( 
-              <View style={styles.ingressoItem}> 
-                <Text>Tipo: {item.tipo}</Text>
-                <Text>Preço: R$ {item.preco}</Text>
-              </View>
-          )}
-            />
-          )}
-          <TouchableOpacity style={styles.closeButton}
-          onPress={()=> setModalVisible(false)}>
-            <Text style={{ color: "white"}}>Fechar</Text>
+          <Text>Efetuar reserva para :{ClassroomSelecionado.number}</Text>
+          
+
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={() => setModalVisible(false)}
+          >
+            <Text style={{ color: "white" }}>Fechar</Text>
           </TouchableOpacity>
         </View>
       </Modal>
@@ -110,9 +98,9 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 20,
   },
-  eventCard: {
+  classroomCard: {
     padding: 15,
-    backgroundColor: "#f1f1f1",
+    backgroundColor: "#green",
     marginBottom: 10,
     borderRadius: 8,
   },

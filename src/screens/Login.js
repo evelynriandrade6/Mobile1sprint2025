@@ -73,7 +73,7 @@ export default function Login() {
       </View>
 
       {/* Botão Final */}
-      <TouchableOpacity onPress={()=>navigation.navigate("ClassroomScreen")} style={styles.button}>
+      <TouchableOpacity onPress={()=>navigation.navigate("Home")} style={styles.button}>
         <Text>Entrar</Text>
       </TouchableOpacity>
       <View style={styles.navigate}>

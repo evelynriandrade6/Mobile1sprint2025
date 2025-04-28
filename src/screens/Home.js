@@ -16,7 +16,7 @@ export default function Home({ navigation }) {
       <Text style={styles.title}> Bem-vindos a Agenda!</Text>
 
       <View style={styles.linha}>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate("ClassroomScreen")}>
           <Ionicons
             style={styles.icone}
             name="calendar"
