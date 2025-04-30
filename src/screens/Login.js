@@ -25,7 +25,7 @@ export default function Login() {
       (response) => {
         console.log(response);
         Alert.alert(response.data.message);
-        navigation.navigate("Home");
+        navigation.navigate("Home",{user:response.data.user});
       },
       (error) => {
         console.log(error.response.data.error);
@@ -73,7 +73,7 @@ export default function Login() {
       </View>
 
       {/* Botão Final */}
-      <TouchableOpacity onPress={()=>navigation.navigate("Home")} style={styles.button}>
+      <TouchableOpacity onPress={()=>handleLogin()} style={styles.button}>
         <Text>Entrar</Text>
       </TouchableOpacity>
       <View style={styles.navigate}>

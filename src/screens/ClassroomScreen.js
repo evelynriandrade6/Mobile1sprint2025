@@ -8,15 +8,71 @@ import {
   Modal,
   StyleSheet,
   ActivityIndicator,
+  TextInput,
+  Alert,
 } from "react-native";
+import DropDownPicker from "react-native-dropdown-picker";
 
-export default function ClassroomScreen({ navigation }) {
+export default function ClassroomScreen({ navigation, route }) {
   const [classroom, setClassroom] = useState([]);
-  const [schedule, setSchedule] = useState([]);
+  const [schedules, setSchedule] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(true);
   const [ClassroomSelecionado, setClassroomSelecionado] = useState("");
-  
+  const [mostrarForm, setMostrarForm] = useState(false);
+  const [openDropDown, setOpenDropDown] = useState(false);
+  const [novaReserva, setnovaReserva] = useState({
+    dateStart: "",
+    dateEnd: "",
+    days: [],
+    user: route.params.user,
+    classroom: "",
+    timeStart: "",
+    timeEnd: "",
+  });
+  const [dias, setDias] = useState([
+    { label: "Seg", value: "Seg" },
+    { label: "Ter", value: "Ter" },
+    { label: "Qua", value: "Qua" },
+    { label: "Qui", value: "Qui" },
+    { label: "Sex", value: "Sex" },
+  ]);
+
+  async function createSchedule() {
+    try {
+      const response = await api.createSchedule({
+        dateStart: novaReserva.dateStart,
+        dateEnd: novaReserva.dateEnd,
+        days: novaReserva.days,
+        user: novaReserva.user,
+        classroom: ClassroomSelecionado.number,
+        timeStart: novaReserva.timeStart,
+        timeEnd: novaReserva.timeEnd,
+      });
+      Alert.alert(response.data.message);
+
+      // Atualiza lista
+      // const responseAtualizado = await api.getSchedulesByIdClassroom(
+      //   ClassroomSelecionado.number
+      // );
+      // setIngressos(responseAtualizado.data.ingressos);
+
+      // Limpa e esconde o formulário
+      setnovaReserva({
+        dateStart: "",
+        dateEnd: "",
+        days: [],
+        user: "",
+        classroom: "",
+        timeStart: "",
+        timeEnd: "",
+      });
+      setMostrarForm(false);
+    } catch (error) {
+      console.log("Erro ao criar reserva", error.response.data);
+      Alert.alert(error.response.data.error);
+    }
+  }
 
   useEffect(() => {
     getAllClassrooms();
@@ -25,7 +81,6 @@ export default function ClassroomScreen({ navigation }) {
   async function getAllClassrooms() {
     try {
       const response = await api.getAllClassrooms();
-      console.log(response.data);
       setClassroom(response.data.classrooms);
       setLoading(false);
     } catch (error) {
@@ -66,6 +121,7 @@ export default function ClassroomScreen({ navigation }) {
           )}
         />
       )}
+
       <Modal
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
@@ -73,7 +129,83 @@ export default function ClassroomScreen({ navigation }) {
       >
         <View style={styles.modalContainer}>
           <Text>Efetuar reserva para :{ClassroomSelecionado.number}</Text>
-          
+
+          <TouchableOpacity
+            style={[styles.closeButton, { backgroundColor: "green" }]}
+            onPress={() => setMostrarForm(!mostrarForm)}
+          >
+            <Text style={{ color: "white" }}>
+              {mostrarForm ? "Cancelar" : "Criar nova reserva"}
+            </Text>
+          </TouchableOpacity>
+
+          {mostrarForm && (
+            <View style={{ marginTop: 20 }}>
+              <Text>Data da reserva:</Text>
+              <TextInput
+                value={novaReserva.dateStart}
+                onChangeText={(date) =>
+                  setnovaReserva({ ...novaReserva, dateStart: date })
+                }
+                style={styles.input}
+                placeholder="Ex: 2025-04-30"
+              />
+
+              <Text>Data do fim da reserva:</Text>
+              <TextInput
+                value={novaReserva.dateEnd}
+                onChangeText={(date) =>
+                  setnovaReserva({ ...novaReserva, dateEnd: date })
+                }
+                style={styles.input}
+                placeholder="Ex: 2025-04-30"
+              />
+              <Text>dias:</Text>
+              <DropDownPicker
+                multiple={true}
+                min={0}
+                max={7}
+                open={openDropDown}
+                value={novaReserva.days}
+                items={dias}
+                setOpen={setOpenDropDown}
+                setValue={(callback) =>
+                  setnovaReserva((prev) => ({
+                    ...prev,
+                    days: callback(prev.days),
+                  }))
+                }
+                setItems={setDias}
+                placeholder="Selecione os dias"
+                mode="BADGE"
+              />
+
+              <Text>Horário de Inicio:</Text>
+              <TextInput
+                value={novaReserva.timeStart}
+                onChangeText={(time) =>
+                  setnovaReserva({ ...novaReserva, timeStart: time })
+                }
+                style={styles.input}
+                placeholder="Ex: 11:00:00"
+              />
+              <Text>Horario do fim da reserva:</Text>
+              <TextInput
+                value={novaReserva.timeEnd}
+                onChangeText={(time) =>
+                  setnovaReserva({ ...novaReserva, timeEnd: time })
+                }
+                style={styles.input}
+                placeholder="Ex:11:00:00"
+              />
+              <TouchableOpacity
+                style={[styles.closeButton, { backgroundColor: "purple" }]}
+                onPress={createSchedule}
+              >
+                <Text style={{ color: "white" }}>Salvar reserva</Text>
+              </TouchableOpacity>
+            </View>
+          )}
 
           <TouchableOpacity
             style={styles.closeButton}
@@ -82,6 +214,10 @@ export default function ClassroomScreen({ navigation }) {
             <Text style={{ color: "white" }}>Fechar</Text>
           </TouchableOpacity>
         </View>
+        <TouchableOpacity
+          style={styles.classroomCard}
+          onPress={() => abrirModalComTeladeReserva(item)}
+        ></TouchableOpacity>
       </Modal>
     </View>
   );
@@ -130,5 +266,12 @@ const styles = StyleSheet.create({
     padding: 10,
     alignItems: "center",
     borderRadius: 6,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 6,
+    padding: 10,
+    marginBottom: 10,
   },
 });

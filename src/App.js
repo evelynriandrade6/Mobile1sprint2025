@@ -5,6 +5,7 @@ import Login from "./screens/Login";
 import Cadastro from "./screens/Cadastro";
 import Home from './screens/Home';
 import ClassroomScreen from './screens/ClassroomScreen';
+// import Layout from "./components/layout";
 
 const Stack = createStackNavigator();
 
