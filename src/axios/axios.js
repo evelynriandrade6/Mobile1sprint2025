@@ -14,6 +14,7 @@ const sheets = {
     getAllClassrooms:()=> api.get("/classroom"),
     getSchedulesByIdClassroom:(reservas) => api.get(`"/schedule/:id"${reservas}`),
     createSchedule: (dados) => api.post("/schedule", dados),
+    getSchedulesByIdClassroomRanges: (id,dataInicio,dataFim) => api.get(`/schedule/ranges/${id}?weekStart=${dataInicio}&weekEnd=${dataFim}`),
 }
 
 export default sheets;

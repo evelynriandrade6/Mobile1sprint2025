@@ -21,6 +21,9 @@ export default function ClassroomScreen({ navigation, route }) {
   const [ClassroomSelecionado, setClassroomSelecionado] = useState("");
   const [mostrarForm, setMostrarForm] = useState(false);
   const [openDropDown, setOpenDropDown] = useState(false);
+  const [modalDisponibilidade, setModalDisponibilidade] = useState(false);
+  const [filtroDataInicio, setFiltroDataInicio] = useState("");
+  const [filtroDataFim, setFiltroDataFim] = useState("");
   const [novaReserva, setnovaReserva] = useState({
     dateStart: "",
     dateEnd: "",
@@ -37,9 +40,20 @@ export default function ClassroomScreen({ navigation, route }) {
     { label: "Qui", value: "Qui" },
     { label: "Sex", value: "Sex" },
   ]);
+  const [horariosDisponiveis, setHorariosDisponiveis] = useState([]);
 
   async function createSchedule() {
     try {
+      console.log("Criando reserva com os dados:", {
+        dateStart: novaReserva.dateStart,
+        dateEnd: novaReserva.dateEnd,
+        days: novaReserva.days,
+        user: novaReserva.user,
+        classroom: ClassroomSelecionado.number,
+        timeStart: novaReserva.timeStart,
+        timeEnd: novaReserva.timeEnd,
+      });
+
       const response = await api.createSchedule({
         dateStart: novaReserva.dateStart,
         dateEnd: novaReserva.dateEnd,
@@ -49,15 +63,10 @@ export default function ClassroomScreen({ navigation, route }) {
         timeStart: novaReserva.timeStart,
         timeEnd: novaReserva.timeEnd,
       });
+
+      console.log("Resposta da criação da reserva:", response.data);
       Alert.alert(response.data.message);
 
-      // Atualiza lista
-      // const responseAtualizado = await api.getSchedulesByIdClassroom(
-      //   ClassroomSelecionado.number
-      // );
-      // setIngressos(responseAtualizado.data.ingressos);
-
-      // Limpa e esconde o formulário
       setnovaReserva({
         dateStart: "",
         dateEnd: "",
@@ -69,8 +78,11 @@ export default function ClassroomScreen({ navigation, route }) {
       });
       setMostrarForm(false);
     } catch (error) {
-      console.log("Erro ao criar reserva", error.response.data);
-      Alert.alert(error.response.data.error);
+      console.log(
+        "Erro ao criar reserva",
+        error.response?.data || error.message
+      );
+      Alert.alert(error.response?.data?.error || error.message);
     }
   }
 
@@ -81,27 +93,94 @@ export default function ClassroomScreen({ navigation, route }) {
   async function getAllClassrooms() {
     try {
       const response = await api.getAllClassrooms();
+      console.log("Resposta das salas:", response.data);
       setClassroom(response.data.classrooms);
       setLoading(false);
     } catch (error) {
-      console.log(error.response.data.error);
+      console.log(
+        "Erro ao buscar salas:",
+        error.response?.data?.error || error.message
+      );
     }
   }
 
   async function abrirModalComTeladeReserva(classroom) {
+    console.log("Abrindo modal para a sala:", classroom.number);
     setClassroomSelecionado(classroom);
     setModalVisible(true);
+    setFiltroDataInicio("");
+    setFiltroDataFim("");
+  }
+
+  async function buscarDisponibilidadeFiltrada(classroom) {
+    setClassroomSelecionado(classroom);
+    setHorariosDisponiveis([]);
+    setModalDisponibilidade(true);
+
+    console.log(
+      "Filtrando disponibilidade com datas:",
+      filtroDataInicio,
+      "-",
+      filtroDataFim
+    ); // LOG DAS DATAS DO FILTRO
+
     try {
-      const response = await api.createSchedule(classroom.number);
-      setSchedule(response.data.schedule);
+      console.log(
+        "Buscando disponibilidade para a sala:",
+        classroom.number,
+        "com filtro:",
+        filtroDataInicio,
+        "-",
+        filtroDataFim
+      );
+
+      const response = await api.getSchedulesByIdClassroomRanges(
+        classroom.number,
+        filtroDataInicio,
+        filtroDataFim
+      );
+
+      console.log(
+        "Resposta completa da disponibilidade:",
+        JSON.stringify(response.data, null, 2)
+      );
+
+      const horariosLivres = [];
+
+      const diasDaSemana = Object.keys(
+        response.data.schedulesByDayAndTimeRange
+      );
+
+      diasDaSemana.forEach((dia) => {
+        const horarios = response.data.schedulesByDayAndTimeRange[dia];
+        Object.entries(horarios).forEach(([intervalo, reservas]) => {
+          if (!reservas || reservas.length === 0) {
+            const [inicio, fim] = intervalo.split(" - ");
+            horariosLivres.push({
+              day: dia,
+              timeStart: inicio.trim(),
+              timeEnd: fim.trim(),
+            });
+          }
+        });
+      });
+
+      setHorariosDisponiveis(horariosLivres);
     } catch (error) {
-      console.log("Erro ao entrar na sala", error.response);
+      console.error(
+        "Erro ao verificar disponibilidade:",
+        error.response?.data || error.message
+      );
+      Alert.alert(
+        "Erro ao buscar disponibilidade",
+        error.response?.data?.error || error.message
+      );
     }
   }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Salas Disponiveis</Text>
+      <Text style={styles.title}>Salas Disponíveis</Text>
 
       {loading ? (
         <ActivityIndicator size="large" color="blue" />
@@ -128,10 +207,10 @@ export default function ClassroomScreen({ navigation, route }) {
         animationType="slide"
       >
         <View style={styles.modalContainer}>
-          <Text>Efetuar reserva para :{ClassroomSelecionado.number}</Text>
+          <Text>Efetuar reserva para : {ClassroomSelecionado.number}</Text>
 
           <TouchableOpacity
-            style={[styles.closeButton, { backgroundColor: "green" }]}
+            style={[styles.closeButton, { backgroundColor: "blue" }]}
             onPress={() => setMostrarForm(!mostrarForm)}
           >
             <Text style={{ color: "white" }}>
@@ -199,7 +278,7 @@ export default function ClassroomScreen({ navigation, route }) {
                 placeholder="Ex:11:00:00"
               />
               <TouchableOpacity
-                style={[styles.closeButton, { backgroundColor: "purple" }]}
+                style={[styles.closeButton, { backgroundColor: "green" }]}
                 onPress={createSchedule}
               >
                 <Text style={{ color: "white" }}>Salvar reserva</Text>
@@ -208,16 +287,75 @@ export default function ClassroomScreen({ navigation, route }) {
           )}
 
           <TouchableOpacity
-            style={styles.closeButton}
+            style={[styles.closeButton, { backgroundColor: "blue" }]}
+            onPress={() => setModalDisponibilidade(true)}
+          >
+            <Text style={{ color: "white" }}>Ver disponibilidade</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.closeButton, {backgroundColor: "#810000"}]}
             onPress={() => setModalVisible(false)}
           >
             <Text style={{ color: "white" }}>Fechar</Text>
           </TouchableOpacity>
         </View>
-        <TouchableOpacity
-          style={styles.classroomCard}
-          onPress={() => abrirModalComTeladeReserva(item)}
-        ></TouchableOpacity>
+      </Modal>
+
+      <Modal
+        visible={modalDisponibilidade}
+        onRequestClose={() => setModalDisponibilidade(false)}
+        animationType="slide"
+      >
+        <View style={styles.modalContainer}>
+          <Text>
+            Disponibilidade para a sala {ClassroomSelecionado.number}:
+          </Text>
+
+          <Text style={{ marginTop: 20 }}>Filtrar por data:</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Data de Início (YYYY-MM-DD)"
+            value={filtroDataInicio}
+            onChangeText={setFiltroDataInicio}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Data de Fim (YYYY-MM-DD)"
+            value={filtroDataFim}
+            onChangeText={setFiltroDataFim}
+          />
+          <TouchableOpacity
+            style={[styles.closeButton, { backgroundColor: "green" }]}
+            onPress={() => buscarDisponibilidadeFiltrada(ClassroomSelecionado)}
+          >
+            <Text style={{ color: "white" }}>Buscar disponibilidade</Text>
+          </TouchableOpacity>
+
+          {horariosDisponiveis.length > 0 ? (
+            <FlatList
+              data={horariosDisponiveis}
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={({ item }) => (
+                <View style={styles.availabilityItem}>
+                  <Text>
+                    {item.day}: {item.timeStart} - {item.timeEnd}
+                  </Text>
+                </View>
+              )}
+            />
+          ) : (
+            <Text>
+              Sem disponibilidade de horários para o período selecionado.
+            </Text>
+          )}
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={() => setModalDisponibilidade(false)}
+          >
+            <Text style={{ color: "white" }}>Fechar</Text>
+          </TouchableOpacity>
+        </View>
       </Modal>
     </View>
   );
@@ -236,29 +374,14 @@ const styles = StyleSheet.create({
   },
   classroomCard: {
     padding: 15,
-    backgroundColor: "#green",
+    backgroundColor: "#A4A4A4",
     marginBottom: 10,
     borderRadius: 8,
-  },
-  eventName: {
-    fontSize: 18,
-    fontWeight: "bold",
   },
   modalContainer: {
     flex: 1,
     padding: 20,
     paddingTop: 50,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 15,
-  },
-  ingressoItem: {
-    padding: 10,
-    backgroundColor: "#e6e6e6",
-    marginBottom: 10,
-    borderRadius: 6,
   },
   closeButton: {
     marginTop: 20,
@@ -273,5 +396,11 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     padding: 10,
     marginBottom: 10,
+  },
+  availabilityItem: {
+    padding: 10,
+    backgroundColor: "#e6e6e6",
+    marginBottom: 10,
+    borderRadius: 6,
   },
 });
