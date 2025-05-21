@@ -1,23 +1,21 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Image,
-} from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 
 export default function Home({ navigation, route }) {
-  const {user}= route.params;
+  const { user } = route.params;
   return (
     <View style={styles.container}>
       <Image source={require("../../assets/SENAI.png")} style={styles.imagem} />
       <Text style={styles.title}> Bem-vindo {user.name} a Agenda!</Text>
 
       <View style={styles.linha}>
-        <TouchableOpacity onPress={() => navigation.navigate("ClassroomScreen",{user:user.cpf})}>
+        <TouchableOpacity
+          onPress={() =>
+            navigation.navigate("ClassroomScreen", { user: user.cpf })
+          }
+        >
           <Ionicons
             style={styles.icone}
             name="calendar"
@@ -29,7 +27,9 @@ export default function Home({ navigation, route }) {
       </View>
 
       <View style={styles.linha}>
-        <TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => navigation.navigate("UserPage", { nome: user.name })}
+        >
           <FontAwesome5
             style={styles.icone}
             name="user-circle"
@@ -42,7 +42,9 @@ export default function Home({ navigation, route }) {
     </View>
   );
 
-  {/* Estilização do Home */}
+  {
+    /* Estilização do Home */
+  }
 }
 
 const styles = StyleSheet.create({
