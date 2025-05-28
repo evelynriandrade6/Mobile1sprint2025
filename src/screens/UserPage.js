@@ -8,12 +8,18 @@ import {
   Alert,
   Modal,
 } from "react-native";
-import axios from "axios";
 import { FontAwesome5 } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native"; // ajuste o caminho conforme sua estrutura
+import { Axios } from "axios";
 
 export default function UserPage({ route }) {
-  const { user } = route.params;
-  const { name: initialName = "", email: initialEmail = "", password: initialPassword = "", cpf = "" } = user || {};
+  const { user } = route.params || {};
+  const {
+    name: initialName = "",
+    email: initialEmail = "",
+    password: initialPassword = "",
+    cpf = "",
+  } = user;
 
   const [userData, setUserData] = useState({
     name: initialName,
@@ -24,8 +30,11 @@ export default function UserPage({ route }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [editData, setEditData] = useState(userData);
   const [confirmCpf, setConfirmCpf] = useState("");
+  const navigation = useNavigation();
 
-  const senhaMascara = userData.password ? "*".repeat(userData.password.length) : "";
+  const senhaMascara = userData.password
+    ? "*".repeat(userData.password.length)
+    : "";
 
   function handleOpenModal() {
     setEditData(userData);
@@ -39,7 +48,6 @@ export default function UserPage({ route }) {
       return;
     }
 
-    // Monta só os campos esperados para enviar
     const payload = {
       name: editData.name,
       email: editData.email,
@@ -47,47 +55,75 @@ export default function UserPage({ route }) {
     };
 
     try {
-      const response = await axios.put(`http://10.89.240.67:5000/api/reservas/v1/user/${cpf}`, payload);
+      const response = await api.put(`/user/${cpf}`, payload);
       console.log("Resposta do servidor:", response.data);
 
       setUserData(editData);
       setModalVisible(false);
       Alert.alert("Sucesso", "Dados atualizados com sucesso!");
     } catch (error) {
-      // Mostra erro detalhado no console e no alert
       console.error("Erro ao atualizar:", error.response?.data || error.message);
-      Alert.alert(
-        "Erro",
-        `Não foi possível atualizar os dados: ${error.response?.data?.error || error.message}`
-      );
+
+      const mensagemErro =
+        error.response?.data?.error ||
+        error.response?.data?.message ||
+        "Erro inesperado ao atualizar os dados.";
+
+      Alert.alert("Erro", mensagemErro);
     }
+  }
+
+  function handleLogout() {
+    navigation.replace("Login");
+  }
+
+  function handleGoHome() {
+    navigation.navigate("Home", { user: { ...userData, cpf } });
   }
 
   return (
     <View style={styles.container}>
-      <View style={styles.iconHeader}>
-        <FontAwesome5 name="user-circle" size={40} color="#333" />
-        <Text style={styles.title}>Área do Usuário</Text>
+      <View>
+        <View style={styles.iconHeader}>
+          <FontAwesome5 name="user-circle" size={40} color="#333" />
+          <Text style={styles.title}>Área do Usuário</Text>
+        </View>
+
+        {["name", "email", "password", "cpf"].map((field) => (
+          <View key={field} style={styles.infoRow}>
+            <Text style={styles.label}>
+              {field === "password" ? "Senha:" : field.toUpperCase() + ":"}
+            </Text>
+            <Text style={styles.value}>
+              {field === "password"
+                ? senhaMascara
+                : field === "cpf"
+                ? cpf
+                : userData[field]}
+            </Text>
+          </View>
+        ))}
+
+        <TouchableOpacity style={styles.btnEdit} onPress={handleOpenModal}>
+          <Text style={styles.textBtn}>Editar Dados</Text>
+        </TouchableOpacity>
       </View>
 
-      {["name", "email", "password", "cpf"].map((field) => (
-        <View key={field} style={styles.infoRow}>
-          <Text style={styles.label}>
-            {field === "password" ? "Senha:" : field.toUpperCase() + ":"}
-          </Text>
-          <Text style={styles.value}>
-            {field === "password"
-              ? senhaMascara
-              : field === "cpf"
-              ? cpf
-              : userData[field]}
-          </Text>
-        </View>
-      ))}
+      <View style={styles.navigationButtons}>
+        <TouchableOpacity
+          style={[styles.btnNav, { backgroundColor: "#007AFF" }]}
+          onPress={handleGoHome}
+        >
+          <Text style={styles.textBtn}>Voltar para Home</Text>
+        </TouchableOpacity>
 
-      <TouchableOpacity style={styles.btnEdit} onPress={handleOpenModal}>
-        <Text style={styles.textBtn}>Editar Dados</Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.btnNav, { backgroundColor: "#FF3B30" }]}
+          onPress={handleLogout}
+        >
+          <Text style={styles.textBtn}>Logout</Text>
+        </TouchableOpacity>
+      </View>
 
       <Modal visible={modalVisible} animationType="slide" transparent>
         <View style={styles.modalContainer}>
@@ -98,7 +134,9 @@ export default function UserPage({ route }) {
             <TextInput
               style={styles.input}
               value={editData.name}
-              onChangeText={(text) => setEditData((prev) => ({ ...prev, name: text }))}
+              onChangeText={(text) =>
+                setEditData((prev) => ({ ...prev, name: text }))
+              }
               placeholder="Nome"
             />
 
@@ -106,7 +144,9 @@ export default function UserPage({ route }) {
             <TextInput
               style={styles.input}
               value={editData.email}
-              onChangeText={(text) => setEditData((prev) => ({ ...prev, email: text }))}
+              onChangeText={(text) =>
+                setEditData((prev) => ({ ...prev, email: text }))
+              }
               keyboardType="email-address"
               placeholder="Email"
             />
@@ -115,7 +155,9 @@ export default function UserPage({ route }) {
             <TextInput
               style={styles.input}
               value={editData.password}
-              onChangeText={(text) => setEditData((prev) => ({ ...prev, password: text }))}
+              onChangeText={(text) =>
+                setEditData((prev) => ({ ...prev, password: text }))
+              }
               secureTextEntry
               placeholder="Senha"
             />
@@ -152,7 +194,13 @@ export default function UserPage({ route }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, paddingTop: 50, backgroundColor: "#fff" },
+  container: {
+    flex: 1,
+    padding: 20,
+    paddingTop: 50,
+    backgroundColor: "#fff",
+    justifyContent: "space-between",
+  },
   iconHeader: {
     flexDirection: "row",
     alignItems: "center",
@@ -202,6 +250,18 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 6,
     width: "48%",
+    alignItems: "center",
+  },
+  navigationButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: "auto",
+    gap: 10,
+  },
+  btnNav: {
+    flex: 1,
+    padding: 12,
+    borderRadius: 6,
     alignItems: "center",
   },
 });

@@ -28,7 +28,7 @@ export default function ClassroomScreen({ navigation, route }) {
     dateStart: "",
     dateEnd: "",
     days: [],
-    user: route.params.user,
+    user: route.params.user.toString(),
     classroom: "",
     timeStart: "",
     timeEnd: "",
@@ -294,7 +294,7 @@ export default function ClassroomScreen({ navigation, route }) {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.closeButton, {backgroundColor: "#810000"}]}
+            style={[styles.closeButton, { backgroundColor: "#810000" }]}
             onPress={() => setModalVisible(false)}
           >
             <Text style={{ color: "white" }}>Fechar</Text>

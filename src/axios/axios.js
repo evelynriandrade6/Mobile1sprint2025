@@ -13,8 +13,7 @@ const sheets = {
   getAllClassrooms: () => api.get("/classroom"),
   getSchedulesByIdClassroom: (id) => api.get(`/schedule/${id}`),
   createSchedule: (dados) => api.post("/schedule", dados),
-  getSchedulesByIdClassroomRanges: (id, dataInicio, dataFim) =>
-    api.get(`/schedule/ranges/${id}?weekStart=${dataInicio}&weekEnd=${dataFim}`),
+  getSchedulesByIdClassroomRanges: (id, dataInicio, dataFim) => api.get(`/schedule/ranges/${id}?weekStart=${dataInicio}&weekEnd=${dataFim}`),
   getSchedulesByUser: (cpf) => api.get(`/reservas/${cpf}`),
   deleteSchedule: (id) => api.delete(`/reservas/${id}`),
   updateUser: (cpf, dados) => api.put(`/user/${cpf}`, dados), 
