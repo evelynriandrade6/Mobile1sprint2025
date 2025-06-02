@@ -9,8 +9,8 @@ import {
   Modal,
 } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native"; // ajuste o caminho conforme sua estrutura
-import { Axios } from "axios";
+import { useNavigation } from "@react-navigation/native";
+import api from "../axios/axios"; // <-- agora está correto
 
 export default function UserPage({ route }) {
   const { user } = route.params || {};
@@ -55,14 +55,17 @@ export default function UserPage({ route }) {
     };
 
     try {
-      const response = await api.put(`/user/${cpf}`, payload);
+      const response = await api.updateUser(cpf, payload); // <- CORRIGIDO AQUI
       console.log("Resposta do servidor:", response.data);
 
       setUserData(editData);
       setModalVisible(false);
       Alert.alert("Sucesso", "Dados atualizados com sucesso!");
     } catch (error) {
-      console.error("Erro ao atualizar:", error.response?.data || error.message);
+      console.error(
+        "Erro ao atualizar:",
+        error.response?.data || error.message
+      );
 
       const mensagemErro =
         error.response?.data?.error ||

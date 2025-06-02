@@ -15,12 +15,15 @@ export default function MinhasReservas({ navigation, route }) {
   const [reservas, setReservas] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Função para carregar reservas do usuário via API
   async function getReservas() {
     try {
       setLoading(true);
-      const response = await api.getSchedulesByUser(user.cpf); // supondo esse método na api
-      setReservas(response.data.reservas || []);
+      const response = await api.getSchedulesByUser(user.cpf);
+      console.log("Reservas do usuário:", response.data); // debug no console
+
+      // Ajuste conforme o formato da resposta da API
+      const reservasRecebidas = response.data.reservas || response.data || [];
+      setReservas(reservasRecebidas);
     } catch (error) {
       Alert.alert(
         "Erro",
@@ -35,7 +38,6 @@ export default function MinhasReservas({ navigation, route }) {
     getReservas();
   }, []);
 
-  // Função para excluir reserva
   async function excluirReserva(id) {
     Alert.alert(
       "Confirmar exclusão",
@@ -48,7 +50,7 @@ export default function MinhasReservas({ navigation, route }) {
           onPress: async () => {
             try {
               setLoading(true);
-              await api.deleteSchedule(id); // supondo método delete na api
+              await api.deleteSchedule(id);
               setReservas((prev) => prev.filter((r) => r.id !== id));
             } catch (error) {
               Alert.alert(
@@ -67,12 +69,14 @@ export default function MinhasReservas({ navigation, route }) {
 
   const renderItem = ({ item }) => (
     <View style={styles.reservaItem}>
-      <View>
-        <Text style={styles.sala}>Sala: {item.classroom}</Text>
-        <Text>Data: {item.dateStart} até {item.dateEnd}</Text>
-        <Text>Horário: {item.timeStart} - {item.timeEnd}</Text>
-        <Text>Dias: {item.days.join(", ")}</Text>
-      </View>
+      <Text style={styles.sala}>Sala: {item.classroom}</Text>
+      <Text>
+        Data: {item.dateStart} até {item.dateEnd}
+      </Text>
+      <Text>
+        Horário: {item.timeStart} - {item.timeEnd}
+      </Text>
+      <Text>Dias: {item.days.join(", ")}</Text>
       <TouchableOpacity
         style={styles.btnExcluir}
         onPress={() => excluirReserva(item.id)}
@@ -92,12 +96,17 @@ export default function MinhasReservas({ navigation, route }) {
       ) : (
         <FlatList
           data={reservas}
+          numColumns={2}
           keyExtractor={(item) => item.id.toString()}
           renderItem={renderItem}
+          columnWrapperStyle={{ justifyContent: "space-between" }}
           contentContainerStyle={{ paddingBottom: 20 }}
         />
       )}
-      <TouchableOpacity style={styles.btnVoltar} onPress={() => navigation.goBack()}>
+      <TouchableOpacity
+        style={styles.btnVoltar}
+        onPress={() => navigation.goBack()}
+      >
         <Text style={styles.textBtn}>Voltar</Text>
       </TouchableOpacity>
     </View>
@@ -108,19 +117,21 @@ const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, paddingTop: 50, backgroundColor: "#fff" },
   title: { fontSize: 22, fontWeight: "bold", marginBottom: 20 },
   reservaItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flex: 1,
     backgroundColor: "#e6e6e6",
     borderRadius: 8,
     padding: 15,
     marginBottom: 15,
+    marginHorizontal: 5,
   },
   sala: { fontWeight: "bold", fontSize: 16, marginBottom: 5 },
   btnExcluir: {
     backgroundColor: "#f44336",
     justifyContent: "center",
     borderRadius: 6,
-    paddingHorizontal: 15,
+    paddingHorizontal: 10,
+    marginTop: 10,
+    alignSelf: "flex-start",
   },
   textBtn: { color: "white", fontWeight: "bold" },
   empty: { fontStyle: "italic", textAlign: "center", marginTop: 40 },

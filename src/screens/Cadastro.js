@@ -116,9 +116,11 @@ export default function Cadastro() {
     </View>
   );
 
-  {/* Estilização do cadastro */}
+  {
+    /* Estilização do cadastro */
+  }
 }
- 
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,

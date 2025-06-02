@@ -14,78 +14,72 @@ import { useNavigation } from "@react-navigation/native";
 
 export default function Login() {
   const navigation = useNavigation();
-  const [user, setUser] = useState({
+  const [form, setForm] = useState({
     cpf: "",
     password: "",
     showPassword: false,
   });
 
   async function handleLogin() {
-    await api.postLogin(user).then(
-      (response) => {
-        console.log(response);
-        Alert.alert(response.data.message);
-        navigation.navigate("Home",{user:response.data.user});
-      },
-      (error) => {
-        console.log(error.response.data.error);
-        Alert.alert(error.response.data.error);
-      }
-    );
+    try {
+      const response = await api.postLogin({
+        cpf: form.cpf,
+        password: form.password,
+      });
+
+      const usuarioLogado = response.data.user;
+      Alert.alert(response.data.message);
+      navigation.navigate("Home", { user: usuarioLogado });
+    } catch (error) {
+      console.log(error.response?.data?.error || error.message);
+      Alert.alert("Erro", error.response?.data?.error || "Erro ao logar.");
+    }
   }
+
   return (
     <View style={styles.container}>
       <Image source={require("../../assets/SENAI.png")} style={styles.imagem} />
-      <Text style={styles.title}> Faça Login</Text>
-      {/* Input CPF */}
+      <Text style={styles.title}>Faça Login</Text>
+
       <TextInput
         style={styles.input}
         placeholder="CPF"
         placeholderTextColor="black"
-        value={user.cpf}
-        onChangeText={(value) => {
-          setUser({ ...user, cpf: value });
-        }}
+        value={form.cpf}
+        onChangeText={(value) => setForm({ ...form, cpf: value })}
       />
-      {/* View Input senha */}
+
       <View style={styles.passwordContainer}>
-        {/* Input senha */}
         <TextInput
           placeholder="Senha"
           placeholderTextColor="black"
-          value={user.password}
-          secureTextEntry={!user.showPassword}
-          onChangeText={(value) => {
-            setUser({ ...user, password: value });
-          }}
+          value={form.password}
+          secureTextEntry={!form.showPassword}
+          onChangeText={(value) => setForm({ ...form, password: value })}
         />
         <TouchableOpacity
-          onPress={() => setUser({ ...user, showPassword: !user.showPassword })}
+          onPress={() => setForm({ ...form, showPassword: !form.showPassword })}
         >
-          {/* Botão do Ícone */}
           <Ionicons
-            name={user.showPassword ? "eye" : "eye-off"}
+            name={form.showPassword ? "eye" : "eye-off"}
             size={24}
             color="gray"
           />
         </TouchableOpacity>
-        {/* Fecha View Input senha */}
       </View>
 
-      {/* Botão Final */}
-      <TouchableOpacity onPress={()=>handleLogin()} style={styles.button}>
+      <TouchableOpacity onPress={handleLogin} style={styles.button}>
         <Text>Entrar</Text>
       </TouchableOpacity>
+
       <View style={styles.navigate}>
-        <Text> Não possui conta? </Text>
+        <Text>Não possui conta?</Text>
         <TouchableOpacity onPress={() => navigation.navigate("Cadastro")}>
-          <Text style={styles.textnav}> Clique aqui</Text>
+          <Text style={styles.textnav}>Clique aqui</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
-
-  {/* Estilização do login */}
 }
 
 const styles = StyleSheet.create({
@@ -95,12 +89,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 20,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "black",
-    marginTop: 20,
-  },
+  title: { fontSize: 28, fontWeight: "bold", color: "black", marginTop: 20 },
   input: {
     width: "100%",
     height: 50,
@@ -116,28 +105,17 @@ const styles = StyleSheet.create({
     width: "80%",
     alignItems: "center",
   },
-  navigate: {
-    display: "flex",
-    marginTop: 20,
-  },
-  textnav: {
-    color: "#215299",
-    marginLeft: 25,
-    marginTop: 5,
-  },
-  imagem: {
-    height: 60,
-    width: 240,
-  },
+  navigate: { marginTop: 20, flexDirection: "row" },
+  textnav: { color: "#215299", marginLeft: 5 },
+  imagem: { height: 60, width: 240 },
   passwordContainer: {
     flexDirection: "row",
     alignItems: "center",
     width: "100%",
-    paddingRight: 10,
-    width: "100%",
     height: 50,
     borderWidth: 1,
     paddingLeft: 10,
+    paddingRight: 10,
     borderRadius: 130,
     marginBottom: 20,
     justifyContent: "space-between",
