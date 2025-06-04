@@ -11,6 +11,7 @@ import {
 import api from "../axios/axios";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Login() {
   const navigation = useNavigation();
@@ -20,6 +21,9 @@ export default function Login() {
     showPassword: false,
   });
 
+
+  // ...
+
   async function handleLogin() {
     try {
       const response = await api.postLogin({
@@ -28,6 +32,10 @@ export default function Login() {
       });
 
       const usuarioLogado = response.data.user;
+      const token = response.data.token; // ou como o back envia
+
+      await AsyncStorage.setItem("userToken", token);
+
       Alert.alert(response.data.message);
       navigation.navigate("Home", { user: usuarioLogado });
     } catch (error) {
