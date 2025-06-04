@@ -15,7 +15,7 @@ const sheets = {
   createSchedule: (dados) => api.post("/schedule", dados),
   getSchedulesByIdClassroomRanges: (id, dataInicio, dataFim) => api.get(`/schedule/ranges/${id}?weekStart=${dataInicio}&weekEnd=${dataFim}`),
   getSchedulesByUser: (cpf) => api.get(`/scheduleUser/${cpf}`),
-  deleteSchedule: (id) => api.delete(`/reservas/${id}`),
+  deleteSchedule: (id) => api.delete(`/schedule/${id}`),
   updateUser: (cpf, dados) => api.put(`/user/${cpf}`, dados), 
 };
 

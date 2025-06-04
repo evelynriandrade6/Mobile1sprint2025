@@ -28,7 +28,7 @@ export default function ClassroomScreen({ navigation, route }) {
     dateStart: "",
     dateEnd: "",
     days: [],
-    user: route.params.user.toString(),
+    user: route.params.user.cpf,
     classroom: "",
     timeStart: "",
     timeEnd: "",
@@ -43,6 +43,9 @@ export default function ClassroomScreen({ navigation, route }) {
   const [horariosDisponiveis, setHorariosDisponiveis] = useState([]);
 
   async function createSchedule() {
+    console.log(route.params.user.cpf);
+    console.log(novaReserva.user.cpf);
+    console.log(novaReserva.user);
     try {
       console.log("Criando reserva com os dados:", {
         dateStart: novaReserva.dateStart,

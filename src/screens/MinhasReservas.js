@@ -12,18 +12,22 @@ import api from "../axios/axios";
 
 export default function MinhasReservas({ navigation, route }) {
   const { user } = route.params;
-  const [reservas, setReservas] = useState([]);
+  const [reservas, setReservas] = useState({
+    Seg: [],
+    Ter: [],
+    Qua: [],
+    Qui: [],
+    Sex: [],
+    Sab: [],
+  });
   const [loading, setLoading] = useState(true);
 
   async function getReservas() {
     try {
       setLoading(true);
       const response = await api.getSchedulesByUser(user.cpf);
-      console.log("Reservas do usuário:", response.data); // debug no console
-
-      // Ajuste conforme o formato da resposta da API
-      const reservasRecebidas = response.data.reservas || response.data || [];
-      setReservas(reservasRecebidas);
+      console.log("Reservas do usuário:", response.data.schedule);
+      setReservas(response.data.schedule);
     } catch (error) {
       Alert.alert(
         "Erro",
@@ -39,70 +43,66 @@ export default function MinhasReservas({ navigation, route }) {
   }, []);
 
   async function excluirReserva(id) {
+  try {
+    console.log("Excluir reserva ID:", id);
+    // Se quiser garantir, checa se id é número e positivo
+    if (!id || typeof id !== "number" || id <= 0) {
+      Alert.alert("Erro", "ID inválido para exclusão.");
+      return;
+    }
+    await api.deleteSchedule(id);
+    Alert.alert("Sucesso", "Reserva excluída com sucesso!");
+    await getReservas();
+  } catch (error) {
+    console.error("Erro ao excluir reserva:", error);
     Alert.alert(
-      "Confirmar exclusão",
-      "Deseja excluir esta reserva?",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Excluir",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              setLoading(true);
-              await api.deleteSchedule(id);
-              setReservas((prev) => prev.filter((r) => r.id !== id));
-            } catch (error) {
-              Alert.alert(
-                "Erro",
-                error.response?.data?.error || "Não foi possível excluir"
-              );
-            } finally {
-              setLoading(false);
-            }
-          },
-        },
-      ],
-      { cancelable: true }
+      "Erro",
+      error.response?.data?.error ||
+        `Erro ao excluir reserva (ID: ${id})`
     );
   }
+}
 
-  const renderItem = ({ item }) => (
-    <View style={styles.reservaItem}>
-      <Text style={styles.sala}>Sala: {item.classroom}</Text>
-      <Text>
-        Data: {item.dateStart} até {item.dateEnd}
-      </Text>
-      <Text>
-        Horário: {item.timeStart} - {item.timeEnd}
-      </Text>
-      <Text>Dias: {item.days.join(", ")}</Text>
-      <TouchableOpacity
-        style={styles.btnExcluir}
-        onPress={() => excluirReserva(item.id)}
-      >
-        <Text style={styles.textBtn}>Excluir</Text>
-      </TouchableOpacity>
-    </View>
-  );
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Minhas Reservas</Text>
       {loading ? (
         <ActivityIndicator size="large" color="blue" />
-      ) : reservas.length === 0 ? (
+      ) : Object.values(reservas).every((dia) => dia.length === 0) ? (
         <Text style={styles.empty}>Nenhuma reserva encontrada.</Text>
       ) : (
-        <FlatList
-          data={reservas}
-          numColumns={2}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={renderItem}
-          columnWrapperStyle={{ justifyContent: "space-between" }}
-          contentContainerStyle={{ paddingBottom: 20 }}
-        />
+        Object.entries(reservas).map(
+          ([dia, lista]) =>
+            lista.length > 0 && (
+              <View key={dia}>
+                <Text style={styles.diaTitulo}>{dia}</Text>
+                <FlatList
+                  data={lista}
+                  keyExtractor={(item) => item.id.toString()}
+                  renderItem={({ item }) => (
+                    <View style={styles.reservaItem}>
+                      <Text style={styles.sala}>
+                        Sala: {item.classroomName}
+                      </Text>
+                      <Text>
+                        Horário: {item.horaInicio} - {item.horaFim}
+                      </Text>
+                      <TouchableOpacity
+                        style={styles.btnExcluir}
+                        onPress={() => excluirReserva(item.id)}
+                      >
+                        <Text style={styles.textBtn}>Excluir</Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                  contentContainerStyle={{ paddingBottom: 20 }}
+                />
+              </View>
+            )
+        )
       )}
+
       <TouchableOpacity
         style={styles.btnVoltar}
         onPress={() => navigation.goBack()}
