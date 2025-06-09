@@ -11,7 +11,7 @@ import {
 import api from "../axios/axios";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStorage from 'expo-secure-store';
 
 export default function Login() {
   const navigation = useNavigation();
@@ -22,19 +22,22 @@ export default function Login() {
   });
 
 
-  // ...
-
   async function handleLogin() {
     try {
       const response = await api.postLogin({
         cpf: form.cpf,
         password: form.password,
       });
-
+      
       const usuarioLogado = response.data.user;
       const token = response.data.token; // ou como o back envia
 
-      await AsyncStorage.setItem("userToken", token);
+      console.log("Usuario Logado: ", usuarioLogado);
+      console.log("Token: ", response.data.token);
+
+
+      await SecureStorage.setItemAsync("token", token);
+      await SecureStorage.setItemAsync("CPF", usuarioLogado.cpf);
 
       Alert.alert(response.data.message);
       navigation.navigate("Home", { user: usuarioLogado });

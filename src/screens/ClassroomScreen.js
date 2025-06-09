@@ -12,6 +12,7 @@ import {
   Alert,
 } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
+import * as SecureStore from "expo-secure-store";
 
 export default function ClassroomScreen({ navigation, route }) {
   const [classroom, setClassroom] = useState([]);
