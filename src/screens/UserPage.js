@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import api from "../axios/axios"; // <-- agora está correto
+import api from "../axios/axios";
 
 export default function UserPage({ route }) {
   const { user } = route.params || {};
@@ -55,7 +55,7 @@ export default function UserPage({ route }) {
     };
 
     try {
-      const response = await api.updateUser(cpf, payload); // <- CORRIGIDO AQUI
+      const response = await api.updateUser(cpf, payload);
       console.log("Resposta do servidor:", response.data);
 
       setUserData(editData);
@@ -74,6 +74,37 @@ export default function UserPage({ route }) {
 
       Alert.alert("Erro", mensagemErro);
     }
+  }
+
+  async function handleDeleteUser() {
+    Alert.alert(
+      "Confirmar exclusão",
+      "Tem certeza que deseja excluir sua conta? Esta ação não pode ser desfeita.",
+      [
+        {
+          text: "Cancelar",
+          style: "cancel",
+        },
+        {
+          text: "Excluir",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await api.deleteUser(cpf);
+              Alert.alert("Sucesso", "Usuário excluído com sucesso.");
+              navigation.replace("Login");
+            } catch (error) {
+              console.error("Erro ao deletar usuário:", error.response?.data || error.message);
+              const mensagemErro =
+                error.response?.data?.error ||
+                error.response?.data?.message ||
+                "Erro inesperado ao excluir usuário.";
+              Alert.alert("Erro", mensagemErro);
+            }
+          },
+        },
+      ]
+    );
   }
 
   function handleLogout() {
@@ -109,6 +140,13 @@ export default function UserPage({ route }) {
 
         <TouchableOpacity style={styles.btnEdit} onPress={handleOpenModal}>
           <Text style={styles.textBtn}>Editar Dados</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.btnEdit, { backgroundColor: "#FF3B30", marginTop: 15 }]}
+          onPress={handleDeleteUser}
+        >
+          <Text style={styles.textBtn}>Excluir Conta</Text>
         </TouchableOpacity>
       </View>
 

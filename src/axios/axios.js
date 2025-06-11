@@ -35,6 +35,7 @@ const sheets = {
   getSchedulesByUser: (cpf) => api.get(`scheduleUser/${cpf}`),
   deleteSchedule: (id) => api.delete(`schedule/${id}`),
   updateUser: (cpf, dados) => api.put(`user/${cpf}`, dados),
+  deleteUser: (cpf) => api.delete(`user/${cpf}`),
 };
 
 export default sheets;
