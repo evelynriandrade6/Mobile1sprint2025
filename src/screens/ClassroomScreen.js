@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import * as SecureStore from "expo-secure-store";
+import DateTimePickerz from "../components/DatetimePicker";
 
 export default function ClassroomScreen({ navigation, route }) {
   const [classroom, setClassroom] = useState([]);
@@ -92,12 +93,15 @@ export default function ClassroomScreen({ navigation, route }) {
 
   useEffect(() => {
     getAllClassrooms();
+    
   }, []);
 
   async function getAllClassrooms() {
     try {
+      console.log("Hora início: ", novaReserva)
+    console.log("Hora início: ", novaReserva)
       const response = await api.getAllClassrooms();
-      console.log("Resposta das salas:", response.data);
+      //console.log("Resposta das salas:", response.data);
       setClassroom(response.data.classrooms);
       setLoading(false);
     } catch (error) {
@@ -263,24 +267,27 @@ export default function ClassroomScreen({ navigation, route }) {
                 mode="BADGE"
               />
 
-              <Text>Horário de Inicio:</Text>
-              <TextInput
-                value={novaReserva.timeStart}
-                onChangeText={(time) =>
-                  setnovaReserva({ ...novaReserva, timeStart: time })
+              <DateTimePickerz
+                type={"time"}
+                buttonTitle={
+                  novaReserva.timeStart === ""
+                    ? "Selecione o horário de início"
+                    : novaReserva.timeStart.toLocaleString()
                 }
-                style={styles.input}
-                placeholder="Ex: 11:00:00"
+                setValue={setnovaReserva}
+                dateKey="timeStart"
               />
-              <Text>Horario do fim da reserva:</Text>
-              <TextInput
-                value={novaReserva.timeEnd}
-                onChangeText={(time) =>
-                  setnovaReserva({ ...novaReserva, timeEnd: time })
+              <DateTimePickerz
+                type={"time"}
+                buttonTitle={
+                  novaReserva.timeEnd === ""
+                    ? "Selecione o horário de fim"
+                    : novaReserva.timeEnd
                 }
-                style={styles.input}
-                placeholder="Ex:11:00:00"
+                setValue={setnovaReserva}
+                dateKey="timeEnd"
               />
+
               <TouchableOpacity
                 style={[styles.closeButton, { backgroundColor: "green" }]}
                 onPress={createSchedule}
